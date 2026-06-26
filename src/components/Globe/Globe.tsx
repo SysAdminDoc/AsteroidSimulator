@@ -17,6 +17,7 @@ import {
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import type { ImpactEffects } from '../../physics/types';
 import { effectColors } from '../../theme';
+import { EARTH_RADIUS } from '../../physics/constants';
 
 interface GlobeProps {
   lat: number;
@@ -125,6 +126,7 @@ export function Globe({ lat, lon, observerLat, observerLon, results, onLocationC
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const handlerRef = useRef<ScreenSpaceEventHandler | null>(null);
+  const addedPrimitivesRef = useRef<any[]>([]);
 
   useEffect(() => {
     if (!containerRef.current || viewerRef.current) return;
@@ -212,7 +214,10 @@ export function Globe({ lat, lon, observerLat, observerLon, results, onLocationC
     if (!viewer) return;
 
     viewer.entities.removeAll();
-    viewer.scene.primitives.removeAll();
+    for (const p of addedPrimitivesRef.current) {
+      try { viewer.scene.primitives.remove(p); } catch { /* already destroyed */ }
+    }
+    addedPrimitivesRef.current = [];
 
     viewer.entities.add({
       position: Cartesian3.fromDegrees(lon, lat),
@@ -232,6 +237,84 @@ export function Globe({ lat, lon, observerLat, observerLon, results, onLocationC
         pixelOffset: new Cartesian3(0, -15, 0) as any,
       },
     });
+
+    if (results && results.atmosphericEntry.trajectory.length > 2) {
+      const traj = results.atmosphericEntry.trajectory;
+      const bearing = Math.PI;
+
+      const positions: Cartesian3[] = [];
+      const maxDist = traj[traj.length - 1].groundDistance;
+
+      for (let i = 0; i < traj.length; i += Math.max(1, Math.floor(traj.length / 200))) {
+        const pt = traj[i];
+        const distFrac = maxDist > 0 ? pt.groundDistance / EARTH_RADIUS : 0;
+        const ptLat = lat - distFrac * (180 / Math.PI) * Math.cos(bearing);
+        const ptLon = lon + distFrac * (180 / Math.PI) * Math.sin(bearing) / Math.cos(lat * Math.PI / 180);
+
+        positions.push(Cartesian3.fromDegrees(ptLon, ptLat, pt.altitude));
+      }
+
+      if (positions.length > 1) {
+        viewer.entities.add({
+          polyline: {
+            positions,
+            width: 3,
+            material: Color.fromCssColorString('#fab387').withAlpha(0.8),
+          },
+        });
+
+        const entryPt = traj[0];
+        const entryDistFrac = maxDist > 0 ? entryPt.groundDistance / EARTH_RADIUS : 0;
+        const entryLat = lat - entryDistFrac * (180 / Math.PI) * Math.cos(bearing);
+        const entryLon = lon + entryDistFrac * (180 / Math.PI) * Math.sin(bearing) / Math.cos(lat * Math.PI / 180);
+
+        viewer.entities.add({
+          position: Cartesian3.fromDegrees(entryLon, entryLat, entryPt.altitude),
+          point: {
+            pixelSize: 6,
+            color: Color.fromCssColorString('#fab387'),
+            outlineColor: Color.BLACK,
+            outlineWidth: 1,
+          },
+          label: {
+            text: `Entry ${(entryPt.altitude / 1000).toFixed(0)} km`,
+            font: '11px sans-serif',
+            fillColor: Color.fromCssColorString('#fab387'),
+            outlineColor: Color.BLACK,
+            outlineWidth: 2,
+            verticalOrigin: VerticalOrigin.BOTTOM,
+            pixelOffset: new Cartesian3(0, -10, 0) as any,
+          },
+        });
+
+        if (!results.atmosphericEntry.reachesGround && results.atmosphericEntry.airburstAltitude > 0) {
+          const burstIdx = traj.length - 1;
+          const burstPt = traj[burstIdx];
+          const burstDistFrac = maxDist > 0 ? burstPt.groundDistance / EARTH_RADIUS : 0;
+          const burstLat = lat - burstDistFrac * (180 / Math.PI) * Math.cos(bearing);
+          const burstLon = lon + burstDistFrac * (180 / Math.PI) * Math.sin(bearing) / Math.cos(lat * Math.PI / 180);
+
+          viewer.entities.add({
+            position: Cartesian3.fromDegrees(burstLon, burstLat, results.atmosphericEntry.airburstAltitude),
+            point: {
+              pixelSize: 12,
+              color: Color.fromCssColorString('#f38ba8'),
+              outlineColor: Color.fromCssColorString('#fab387'),
+              outlineWidth: 3,
+            },
+            label: {
+              text: `Airburst ${(results.atmosphericEntry.airburstAltitude / 1000).toFixed(1)} km`,
+              font: '12px sans-serif',
+              fillColor: Color.fromCssColorString('#f38ba8'),
+              outlineColor: Color.BLACK,
+              outlineWidth: 2,
+              verticalOrigin: VerticalOrigin.BOTTOM,
+              pixelOffset: new Cartesian3(0, -15, 0) as any,
+            },
+          });
+        }
+      }
+    }
 
     if (observerLat !== null && observerLon !== null) {
       viewer.entities.add({
@@ -283,9 +366,9 @@ export function Globe({ lat, lon, observerLat, observerLon, results, onLocationC
             color: ColorGeometryInstanceAttribute.fromColor(parseRgba(ring.color)),
           },
         });
-        viewer.scene.primitives.add(
-          new GroundPrimitive({ geometryInstances: instance }),
-        );
+        const prim = new GroundPrimitive({ geometryInstances: instance });
+        viewer.scene.primitives.add(prim);
+        addedPrimitivesRef.current.push(prim);
       } catch {
         // skip rings too small or too large for Cesium
       }
