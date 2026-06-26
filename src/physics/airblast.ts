@@ -8,8 +8,16 @@ import {
 import type { AirblastResult } from './types';
 
 function overpressureAtScaledDistance(x: number): number {
-  if (x <= 0) return Infinity;
+  if (x <= 0) return SEA_LEVEL_PRESSURE * 1000;
   return 3.14e11 * x ** -2.6 + 1.8e7 * x ** -1.13;
+}
+
+function groundReflectionFactor(burstAltitude: number, groundRange: number): number {
+  if (burstAltitude <= 0) return 1.8;
+  const heightToRange = burstAltitude / Math.max(groundRange, 1);
+  if (heightToRange > 2) return 1.0;
+  if (heightToRange < 0.1) return 1.8;
+  return 1.0 + 0.8 * (1 - Math.min(heightToRange / 2, 1));
 }
 
 function scaledDistance(distanceM: number, energyKt: number): number {
@@ -29,7 +37,8 @@ function radiusForOverpressure(
     const mid = (lo + hi) / 2;
     const slant = Math.sqrt(mid ** 2 + burstAltitude ** 2);
     const x = scaledDistance(slant, energyKt);
-    const p = overpressureAtScaledDistance(x);
+    const refl = groundReflectionFactor(burstAltitude, mid);
+    const p = overpressureAtScaledDistance(x) * refl;
     if (p > targetPa) {
       lo = mid;
     } else {
@@ -73,7 +82,8 @@ export function computeAirblast(
 
   const slantRange = Math.sqrt(distance ** 2 + burstAltitude ** 2);
   const x = scaledDistance(slantRange, energyKt);
-  const overpressure = overpressureAtScaledDistance(x);
+  const reflFactor = groundReflectionFactor(burstAltitude, distance);
+  const overpressure = overpressureAtScaledDistance(x) * reflFactor;
 
   const wind = windFromOverpressure(overpressure);
   const db = overpressureToDb(overpressure);

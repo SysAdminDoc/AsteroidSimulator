@@ -41,7 +41,7 @@ export function NeoSearch({ onSelect }: NeoSearchProps) {
     setError('');
 
     try {
-      const url = `/api/jpl/sbdb.api?sstr=${encodeURIComponent(q)}&phys-par=true`;
+      const url = `/api/jpl/sbdb.api?sstr=${encodeURIComponent(q)}&phys-par=true&orbit=true`;
       const resp = await fetch(url);
       if (!resp.ok) throw new Error(`API returned ${resp.status}`);
       const data = await resp.json();
@@ -86,12 +86,25 @@ export function NeoSearch({ onSelect }: NeoSearchProps) {
       if (diameter <= 0) diameter = 100;
 
       const density = estimateDensity(specType);
-      const typicalVelocity = 20000;
+
+      let impactVelocity = 20000;
+      const orbitEl = data.orbit?.elements;
+      if (orbitEl) {
+        const aEl = orbitEl.find((e: any) => e.name === 'a');
+        const eEl = orbitEl.find((e: any) => e.name === 'e');
+        if (aEl?.value && eEl?.value) {
+          const a = parseFloat(aEl.value);
+          const ecc = parseFloat(eEl.value);
+          const vInfSq = 29780 ** 2 * (3 - 1 / a - 2 * Math.sqrt(a * (1 - ecc * ecc)));
+          const vEsc = 11186;
+          impactVelocity = Math.sqrt(Math.max(0, vInfSq) + vEsc ** 2);
+        }
+      }
 
       setResults([{
         fullname: obj.fullname || obj.des || q,
         diameter,
-        velocity: typicalVelocity,
+        velocity: impactVelocity,
         density,
       }]);
     } catch (err: any) {
@@ -172,7 +185,8 @@ export function NeoSearch({ onSelect }: NeoSearchProps) {
             {neo.diameter >= 1000
               ? `${(neo.diameter / 1000).toFixed(1)} km`
               : `${neo.diameter.toFixed(0)} m`}
-            {' diameter, '}
+            {' dia, '}
+            {(neo.velocity / 1000).toFixed(1)} km/s,{' '}
             {neo.density} kg/m3
           </div>
           <div style={{ color: catppuccinMocha.green, marginTop: 2, fontSize: 11 }}>
