@@ -18,6 +18,7 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 import type { ImpactEffects } from '../../physics/types';
 import { effectColors } from '../../theme';
 import { EARTH_RADIUS } from '../../physics/constants';
+import { useBlastWave } from './BlastWave';
 
 interface GlobeProps {
   lat: number;
@@ -127,6 +128,8 @@ export function Globe({ lat, lon, observerLat, observerLon, results, onLocationC
   const viewerRef = useRef<Viewer | null>(null);
   const handlerRef = useRef<ScreenSpaceEventHandler | null>(null);
   const addedPrimitivesRef = useRef<any[]>([]);
+
+  useBlastWave(viewerRef.current, lat, lon, results);
 
   useEffect(() => {
     if (!containerRef.current || viewerRef.current) return;
