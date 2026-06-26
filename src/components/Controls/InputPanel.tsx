@@ -2,6 +2,7 @@ import { catppuccinMocha } from '../../theme';
 import { COMPOSITION_DENSITY } from '../../physics/constants';
 import type { ImpactParams, TargetType } from '../../physics/types';
 import { PRESETS } from '../../presets/historical';
+import { NeoSearch } from './NeoSearch';
 
 interface InputPanelProps {
   params: ImpactParams;
@@ -212,6 +213,14 @@ export function InputPanel({ params, onUpdate, onLoadPreset, lat, lon }: InputPa
         unit="km"
         onChange={v => onUpdate('distance', v * 1000)}
         format={v => v.toLocaleString()}
+      />
+
+      <NeoSearch
+        onSelect={neo => {
+          onUpdate('diameter', neo.diameter);
+          onUpdate('density', neo.density);
+          onUpdate('velocity', neo.velocity);
+        }}
       />
     </div>
   );
