@@ -1,45 +1,74 @@
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/SysAdminDoc/AsteroidSimulator/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)]()
+[![Platform](https://img.shields.io/badge/platform-Web-lightgrey.svg)]()
+[![Tests](https://img.shields.io/badge/tests-43%20passing-brightgreen.svg)]()
 
 # AsteroidSimulator
 
 Simulate asteroid and comet impacts on Earth with precise mathematical models. Visualize crater formation, blast waves, thermal radiation, seismic effects, ejecta, and tsunamis from ocean impacts on an interactive 3D globe.
 
+The first open-source implementation of the complete Collins et al. 2005 impact effects chain with interactive visualization.
+
 ## Features
 
-- **Atmospheric Entry** — Drag, ablation, and fragmentation modeling (Hills & Goda 1993)
-- **Crater Formation** — Pi-scaling laws (Holsapple & Schmidt 1987) for transient and final crater dimensions
-- **Blast & Thermal Effects** — Overpressure rings, thermal radiation radii, and fireball modeling
-- **Seismic Shaking** — Equivalent Richter magnitude at distance from impact
-- **Ejecta Distribution** — Ballistic ejecta curtain thickness vs. distance
-- **Ocean Impacts** — Tsunami generation, propagation, and coastal runup
-- **Historical Comparisons** — Chicxulub, Tunguska, Chelyabinsk, Barringer presets
-- **NASA Integration** — Near-Earth Object database (CNEOS/JPL) for real asteroid parameters
-- **Interactive 3D Globe** — Click anywhere to simulate an impact with real-time damage visualization
+- **9 Effect Categories** — Energy, atmospheric entry, crater, thermal radiation, seismic, airblast, ejecta, tsunami, global effects
+- **Atmospheric Entry** — 6 coupled ODEs (Hills & Goda 1993 pancake model) with RK4 integration, fragmentation, ablation
+- **Crater Formation** — Holsapple pi-scaling with simple/complex transition, SVG cross-section diagram
+- **Blast & Thermal** — Overpressure damage rings, thermal burn radii, fireball visualization
+- **Seismic** — Richter magnitude + Mercalli intensity at observer distance
+- **Ocean Impacts** — Ward & Asphaug 2000 tsunami model with dispersive attenuation + Synolakis runup
+- **NASA NEO Database** — Search real asteroids (Apophis, Bennu, 2024 YR4) via JPL SBDB API
+- **Interactive 3D Globe** — CesiumJS with damage ring overlays, trajectory arc, animated blast wave
+- **6 Historical Presets** — Chelyabinsk, Tunguska, Meteor Crater, Ries, Chesapeake Bay, Chicxulub
+- **Observer Marker** — Right-click to place observer, auto-computes great-circle distance
+- **Auto Land/Ocean Detection** — Click coordinates auto-set target type
+- **Shareable URLs** — All parameters encoded in URL hash
+- **Responsive** — Desktop three-panel layout, mobile stacked layout
 
 ## Physics References
 
 Based on peer-reviewed impact science:
 
-- Collins, Melosh & Marcus (2005) — *Earth Impact Effects Program*
+- Collins, Melosh & Marcus (2005) — *Earth Impact Effects Program* (MAPS 40:817-840)
 - Holsapple (1993) — Pi-group crater scaling laws
-- Hills & Goda (1993) — Atmospheric fragmentation model
-- Melosh (1989) — *Impact Cratering: A Geologic Process*
+- Hills & Goda (1993) — Atmospheric fragmentation model (AJ 105:1114-1144)
+- Collins et al. (2017) — Airblast model validation (MAPS 52:1542-1560)
+- Ward & Asphaug (2000) — Impact tsunami (Icarus 145:64-78)
 - Glasstone & Dolan (1977) — Blast/thermal scaling (adapted)
+- Synolakis (1987) — Tsunami coastal runup
 
 ## Getting Started
 
 ```bash
-# Clone
 git clone https://github.com/SysAdminDoc/AsteroidSimulator.git
 cd AsteroidSimulator
-
-# Install dependencies
 npm install
-
-# Development
 npm run dev
+```
+
+## Usage
+
+| Action | Effect |
+|--------|--------|
+| Left click globe | Set impact location (ground zero) |
+| Right click globe | Set observer location (computes distance) |
+| Preset buttons | Load historical impact parameters |
+| NASA NEO search | Look up real asteroid properties |
+| Sliders | Adjust diameter, velocity, angle, distance |
+| URL hash | Share or bookmark any simulation |
+
+## Stack
+
+- React 19 + TypeScript + Vite
+- CesiumJS (3D globe, no token required)
+- Vitest (43 tests)
+
+## Testing
+
+```bash
+npm run test       # run all tests
+npm run test:watch # watch mode
+npm run build      # production build
 ```
 
 ## License

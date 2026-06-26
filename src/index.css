@@ -11,6 +11,72 @@ html, body, #root {
   background: #1e1e2e;
 }
 
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.input-panel {
+  width: 320px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.globe-container {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+}
+
+.results-panel {
+  width: 300px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  height: 100%;
+}
+
+@media (max-width: 1024px) {
+  .app-layout {
+    flex-direction: column;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .input-panel {
+    width: 100%;
+    height: auto;
+    max-height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid #313244;
+  }
+
+  .globe-container {
+    height: 50vh;
+    min-height: 300px;
+  }
+
+  .results-panel {
+    width: 100%;
+    height: auto;
+    border-left: none;
+    border-top: 1px solid #313244;
+  }
+}
+
+@media (max-width: 640px) {
+  .input-panel {
+    max-height: 35vh;
+  }
+
+  .globe-container {
+    height: 40vh;
+    min-height: 250px;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }

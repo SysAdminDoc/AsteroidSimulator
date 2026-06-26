@@ -18,6 +18,16 @@ All notable changes to AsteroidSimulator will be documented in this file.
 - Impact parameter input panel (diameter, density, velocity, angle, target type, observer distance)
 - Results panel showing all 9 effect categories with computed values
 - 6 historical event presets (Chelyabinsk, Tunguska, Meteor Crater, Ries, Chesapeake Bay, Chicxulub)
-- Click-to-impact on globe (click sets ground zero coordinates)
+- Click-to-impact on globe (left click = ground zero, right click = observer)
 - Catppuccin Mocha dark theme
+- NASA CNEOS/JPL Small-Body Database integration (search real asteroids by name)
+- Atmospheric entry trajectory arc on globe with entry/airburst markers
+- Animated blast wave expansion from impact point
+- Crater cross-section SVG diagram (simple bowl / complex with central peak)
+- Effect ring color-coded legend with radii
+- Energy comparison display (Hiroshima, Tsar Bomba, M9 earthquake equivalents)
+- Observer distance marker with haversine great-circle calculation
+- Ocean vs land auto-detection from click coordinates
+- Shareable URL encoding of all impact parameters
+- Responsive layout for mobile/tablet
 - Comprehensive research report (docs/RESEARCH_REPORT.md)

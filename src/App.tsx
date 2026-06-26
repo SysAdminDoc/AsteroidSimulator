@@ -21,25 +21,24 @@ export default function App() {
 
   return (
     <div
+      className="app-layout"
       style={{
-        display: 'flex',
-        height: '100vh',
-        width: '100vw',
         background: catppuccinMocha.base,
         color: catppuccinMocha.text,
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        overflow: 'hidden',
       }}
     >
-      <InputPanel
-        params={params}
-        onUpdate={updateParam}
-        onLoadPreset={loadPreset}
-        lat={impactLat}
-        lon={impactLon}
-      />
+      <div className="input-panel">
+        <InputPanel
+          params={params}
+          onUpdate={updateParam}
+          onLoadPreset={loadPreset}
+          lat={impactLat}
+          lon={impactLon}
+        />
+      </div>
 
-      <div style={{ flex: 1, position: 'relative' }}>
+      <div className="globe-container">
         <div
           style={{
             position: 'absolute',
@@ -91,7 +90,9 @@ export default function App() {
         </div>
       </div>
 
-      {results && <ResultsPanel results={results} />}
+      <div className="results-panel">
+        {results && <ResultsPanel results={results} />}
+      </div>
     </div>
   );
 }
