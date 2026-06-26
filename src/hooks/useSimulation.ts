@@ -11,6 +11,7 @@ const DEFAULT_PARAMS: ImpactParams = {
   angle: 45,
   targetType: 'sedimentary_rock',
   waterDepth: 0,
+  beachSlope: 0.02,
   distance: 50000,
 };
 
@@ -79,6 +80,7 @@ function parseUrlParams(): { params: ImpactParams; lat: number; lon: number } | 
         angle: parseFloat(a),
         targetType: (t || 'sedimentary_rock') as TargetType,
         waterDepth: parseFloat(wd || '0'),
+        beachSlope: 0.02,
         distance: parseFloat(dist || '50000'),
       },
       lat: parseFloat(lat || String(DEFAULT_LAT)),

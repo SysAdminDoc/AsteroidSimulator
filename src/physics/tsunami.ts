@@ -6,6 +6,7 @@ export function computeTsunami(
   distance: number,
   targetType: TargetType,
   waterDepth: number,
+  beachSlope: number = 0.02,
 ): TsunamiResult {
   if (targetType !== 'water' || waterDepth <= 0) {
     return {
@@ -36,7 +37,6 @@ export function computeTsunami(
     amplitudeAtDistance = initialAmplitude * (R0 / distance) ** decayExponent;
   }
 
-  const beachSlope = 0.02; // ~1 degree, typical continental shelf
   const cotBeta = 1 / beachSlope;
   const runupHeight =
     amplitudeAtDistance > 0.01

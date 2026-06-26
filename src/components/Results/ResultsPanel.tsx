@@ -1,6 +1,7 @@
 import { catppuccinMocha } from '../../theme';
 import type { ImpactEffects } from '../../physics/types';
 import { CraterDiagram } from './CraterDiagram';
+import { TrajectoryChart } from './TrajectoryChart';
 
 function fmt(n: number, decimals = 1): string {
   if (!isFinite(n)) return '—';
@@ -25,9 +26,15 @@ function fmtTime(s: number): string {
 }
 
 function fmtEnergy(j: number): string {
+  if (j >= 4.184e18) return `${fmt(j / 4.184e15, 1)} Mt TNT`;
   if (j >= 4.184e15) return `${(j / 4.184e15).toFixed(2)} Mt TNT`;
   if (j >= 4.184e12) return `${(j / 4.184e12).toFixed(1)} kt TNT`;
-  return `${j.toExponential(2)} J`;
+  if (j >= 1e18) return `${(j / 1e18).toFixed(2)} EJ`;
+  if (j >= 1e15) return `${(j / 1e15).toFixed(1)} PJ`;
+  if (j >= 1e12) return `${(j / 1e12).toFixed(1)} TJ`;
+  if (j >= 1e9) return `${(j / 1e9).toFixed(1)} GJ`;
+  if (j >= 1e6) return `${(j / 1e6).toFixed(1)} MJ`;
+  return `${fmt(j)} J`;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -130,6 +137,7 @@ export function ResultsPanel({ results }: ResultsPanelProps) {
           <Row label="Breakup begins" value={fmtDist(atmosphericEntry.breakupAltitude)} />
         )}
         <Row label="Impact velocity" value={`${(atmosphericEntry.impactVelocity / 1000).toFixed(1)} km/s`} />
+        <TrajectoryChart entry={atmosphericEntry} />
       </Section>
 
       {crater && (
@@ -186,6 +194,44 @@ export function ResultsPanel({ results }: ResultsPanelProps) {
           <Row label="Arrival time" value={fmtTime(tsunami.arrivalTime)} />
         </Section>
       )}
+
+      {energy.kineticEnergy >= 1e23 && (
+        <Section title="Global Effects">
+          <Row label="Classification" value="Extinction-level event" highlight />
+          <Row label="Impact winter" value="Months to years of darkness" />
+          <Row label="Global wildfires" value="Re-entering ejecta ignites vegetation" />
+          <Row label="Acid rain" value="NOx + SO2 from shocked atmosphere" />
+          <Row label="Tsunami (if ocean)" value="Global coastline inundation" />
+        </Section>
+      )}
+
+      <Section title="At Your Location">
+        <div style={{
+          background: catppuccinMocha.surface0,
+          borderRadius: 6,
+          padding: '8px 10px',
+          fontSize: 12,
+          lineHeight: 1.6,
+          color: catppuccinMocha.text,
+        }}>
+          {airblast.overpressure >= 137900
+            ? '💀 Total destruction — no survival'
+            : airblast.overpressure >= 48300
+            ? '🏚️ Severe damage — most buildings collapse, high casualties'
+            : airblast.overpressure >= 27600
+            ? '⚠️ Moderate damage — structural failures, injuries from debris'
+            : airblast.overpressure >= 13800
+            ? '🪟 Minor damage — doors blown in, some walls crack'
+            : airblast.overpressure >= 6900
+            ? '🔊 Windows shatter — glass injuries likely'
+            : airblast.overpressure >= 1000
+            ? '👂 Loud boom — startling but no structural damage'
+            : '✅ No significant effects at this distance'}
+          <div style={{ color: catppuccinMocha.overlay0, fontSize: 10, marginTop: 4 }}>
+            Right-click globe to set observer location
+          </div>
+        </div>
+      </Section>
     </div>
   );
 }

@@ -9,6 +9,7 @@ const CHELYABINSK: ImpactParams = {
   angle: 18,
   targetType: 'sedimentary_rock',
   waterDepth: 0,
+  beachSlope: 0.02,
   distance: 50000,
 };
 
@@ -19,6 +20,7 @@ const METEOR_CRATER: ImpactParams = {
   angle: 45,
   targetType: 'sedimentary_rock',
   waterDepth: 0,
+  beachSlope: 0.02,
   distance: 50000,
 };
 
@@ -29,6 +31,7 @@ const CHICXULUB: ImpactParams = {
   angle: 60,
   targetType: 'crystalline_rock',
   waterDepth: 0,
+  beachSlope: 0.02,
   distance: 1000000,
 };
 
@@ -69,6 +72,7 @@ describe('simulate (full chain)', () => {
       angle: 45,
       targetType: 'water',
       waterDepth: 4000,
+      beachSlope: 0.02,
       distance: 500000,
     };
     const result = simulate(params);

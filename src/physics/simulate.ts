@@ -62,6 +62,7 @@ export function simulate(params: ImpactParams): ImpactEffects {
     params.distance,
     params.targetType,
     params.waterDepth,
+    params.beachSlope,
   );
 
   return {

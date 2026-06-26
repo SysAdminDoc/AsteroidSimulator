@@ -109,7 +109,7 @@ function buildRings(results: ImpactEffects): RingDef[] {
     });
   }
 
-  return rings.filter(r => r.radius > 10 && r.radius < 20_000_000);
+  return rings.filter(r => r.radius > 10 && r.radius < 6_371_000 * Math.PI);
 }
 
 function parseRgba(rgba: string): Color {

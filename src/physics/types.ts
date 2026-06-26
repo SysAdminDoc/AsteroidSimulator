@@ -9,6 +9,7 @@ export interface ImpactParams {
   angle: number;          // degrees from horizontal (1-90)
   targetType: TargetType;
   waterDepth: number;     // meters (only used when targetType === 'water')
+  beachSlope: number;     // radians (typical continental shelf ~0.02)
   distance: number;       // observer distance in meters from impact
 }
 

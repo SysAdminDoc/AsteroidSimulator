@@ -192,15 +192,32 @@ export function InputPanel({ params, onUpdate, onLoadPreset, lat, lon }: InputPa
       </select>
 
       {params.targetType === 'water' && (
-        <SliderRow
-          label="Water Depth"
-          value={params.waterDepth}
-          min={10}
-          max={11000}
-          step={10}
-          unit="m"
-          onChange={v => onUpdate('waterDepth', v)}
-        />
+        <>
+          <SliderRow
+            label="Water Depth"
+            value={params.waterDepth}
+            min={10}
+            max={11000}
+            step={10}
+            unit="m"
+            onChange={v => onUpdate('waterDepth', v)}
+          />
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ color: catppuccinMocha.subtext1, fontSize: 12 }}>Coastal Slope</span>
+            </div>
+            <select
+              style={s.select}
+              value={params.beachSlope}
+              onChange={e => onUpdate('beachSlope', parseFloat(e.target.value))}
+            >
+              <option value={0.005}>Gentle shelf (0.3°)</option>
+              <option value={0.02}>Average coast (1.1°)</option>
+              <option value={0.05}>Moderate slope (2.9°)</option>
+              <option value={0.1}>Steep volcanic (5.7°)</option>
+            </select>
+          </div>
+        </>
       )}
 
       <SliderRow
