@@ -1,5 +1,6 @@
 import { catppuccinMocha } from '../../theme';
 import type { ImpactEffects } from '../../physics/types';
+import { CraterDiagram } from './CraterDiagram';
 
 function fmt(n: number, decimals = 1): string {
   if (!isFinite(n)) return '—';
@@ -108,10 +109,13 @@ export function ResultsPanel({ results }: ResultsPanelProps) {
       <Section title="Energy">
         <Row label="Kinetic energy" value={fmtEnergy(energy.kineticEnergy)} highlight />
         <Row label="Impactor mass" value={`${fmt(energy.impactorMass)} kg`} />
-        <Row
-          label="Hiroshima equivalents"
-          value={`${fmt(energy.kilotons / 15, 0)}x`}
-        />
+        <Row label="Hiroshima (15 kt)" value={`${fmt(energy.kilotons / 15, 0)}x`} />
+        {energy.megatons >= 50 && (
+          <Row label="Tsar Bomba (50 Mt)" value={`${fmt(energy.megatons / 50, 1)}x`} />
+        )}
+        {energy.kineticEnergy >= 4.184e20 && (
+          <Row label="M 9.0 earthquake" value={`${fmt(energy.kineticEnergy / 2e18, 1)}x`} />
+        )}
       </Section>
 
       <Section title="Atmospheric Entry">
@@ -138,6 +142,7 @@ export function ResultsPanel({ results }: ResultsPanelProps) {
           {crater.meltVolume > 0 && (
             <Row label="Melt volume" value={`${fmt(crater.meltVolume)} m3`} />
           )}
+          <CraterDiagram crater={crater} />
         </Section>
       )}
 

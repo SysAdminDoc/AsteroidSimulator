@@ -1,4 +1,5 @@
 import { Globe } from './components/Globe/Globe';
+import { RingLegend } from './components/Globe/RingLegend';
 import { InputPanel } from './components/Controls/InputPanel';
 import { ResultsPanel } from './components/Results/ResultsPanel';
 import { useSimulation } from './hooks/useSimulation';
@@ -63,6 +64,8 @@ export default function App() {
           results={results}
           onLocationClick={setImpactLocation}
         />
+
+        {results && <RingLegend results={results} />}
       </div>
 
       {results && <ResultsPanel results={results} />}
