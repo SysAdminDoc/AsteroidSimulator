@@ -11,8 +11,11 @@ export default function App() {
     results,
     impactLat,
     impactLon,
+    observerLat,
+    observerLon,
     updateParam,
     setImpactLocation,
+    setObserverLocation,
     loadPreset,
   } = useSimulation();
 
@@ -61,11 +64,31 @@ export default function App() {
         <Globe
           lat={impactLat}
           lon={impactLon}
+          observerLat={observerLat}
+          observerLon={observerLon}
           results={results}
           onLocationClick={setImpactLocation}
+          onObserverClick={setObserverLocation}
         />
 
         {results && <RingLegend results={results} />}
+
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 16,
+            right: 16,
+            zIndex: 10,
+            background: `${catppuccinMocha.crust}cc`,
+            padding: '6px 12px',
+            borderRadius: 6,
+            border: `1px solid ${catppuccinMocha.surface0}`,
+            fontSize: 10,
+            color: catppuccinMocha.overlay0,
+          }}
+        >
+          Left click: set impact &nbsp; Right click: set observer
+        </div>
       </div>
 
       {results && <ResultsPanel results={results} />}

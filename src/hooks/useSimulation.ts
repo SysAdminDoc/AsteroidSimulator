@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { simulate } from '../physics';
+import { EARTH_RADIUS } from '../physics/constants';
 import type { ImpactParams, TargetType } from '../physics/types';
 import { PRESETS } from '../presets/historical';
 
@@ -15,6 +16,19 @@ const DEFAULT_PARAMS: ImpactParams = {
 
 const DEFAULT_LAT = 35.0268;
 const DEFAULT_LON = -111.0222;
+
+function haversineDistance(
+  lat1: number, lon1: number,
+  lat2: number, lon2: number,
+): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * EARTH_RADIUS * Math.asin(Math.sqrt(a));
+}
 
 function parseUrlParams(): { params: ImpactParams; lat: number; lon: number } | null {
   const hash = window.location.hash.slice(1);
@@ -62,6 +76,8 @@ export function useSimulation() {
   const [params, setParams] = useState<ImpactParams>(initial?.params ?? DEFAULT_PARAMS);
   const [impactLat, setImpactLat] = useState(initial?.lat ?? DEFAULT_LAT);
   const [impactLon, setImpactLon] = useState(initial?.lon ?? DEFAULT_LON);
+  const [observerLat, setObserverLat] = useState<number | null>(null);
+  const [observerLon, setObserverLon] = useState<number | null>(null);
 
   const results = useMemo(() => simulate(params), [params]);
 
@@ -81,10 +97,19 @@ export function useSimulation() {
     setImpactLon(lon);
   }, []);
 
+  const setObserverLocation = useCallback((lat: number, lon: number) => {
+    setObserverLat(lat);
+    setObserverLon(lon);
+    const dist = haversineDistance(impactLat, impactLon, lat, lon);
+    setParams(prev => ({ ...prev, distance: Math.round(dist) }));
+  }, [impactLat, impactLon]);
+
   const loadPreset = useCallback((index: number) => {
     const preset = PRESETS[index];
     if (preset) {
       setParams(preset.params);
+      setObserverLat(null);
+      setObserverLon(null);
     }
   }, []);
 
@@ -93,8 +118,11 @@ export function useSimulation() {
     results,
     impactLat,
     impactLon,
+    observerLat,
+    observerLon,
     updateParam,
     setImpactLocation,
+    setObserverLocation,
     loadPreset,
   };
 }

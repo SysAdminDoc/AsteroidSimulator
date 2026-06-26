@@ -21,8 +21,11 @@ import { effectColors } from '../../theme';
 interface GlobeProps {
   lat: number;
   lon: number;
+  observerLat: number | null;
+  observerLon: number | null;
   results: ImpactEffects | null;
   onLocationClick: (lat: number, lon: number) => void;
+  onObserverClick: (lat: number, lon: number) => void;
 }
 
 interface RingDef {
@@ -118,7 +121,7 @@ function parseRgba(rgba: string): Color {
   );
 }
 
-export function Globe({ lat, lon, results, onLocationClick }: GlobeProps) {
+export function Globe({ lat, lon, observerLat, observerLon, results, onLocationClick, onObserverClick }: GlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const handlerRef = useRef<ScreenSpaceEventHandler | null>(null);
@@ -162,6 +165,21 @@ export function Globe({ lat, lon, results, onLocationClick }: GlobeProps) {
         );
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
+
+    handler.setInputAction((movement: any) => {
+      const cartesian = viewer.camera.pickEllipsoid(
+        movement.position,
+        viewer.scene.globe.ellipsoid,
+      );
+      if (defined(cartesian)) {
+        const carto = Cartographic.fromCartesian(cartesian!);
+        onObserverClick(
+          CesiumMath.toDegrees(carto.latitude),
+          CesiumMath.toDegrees(carto.longitude),
+        );
+      }
+    }, ScreenSpaceEventType.RIGHT_CLICK);
+
     handlerRef.current = handler;
 
     viewer.camera.flyTo({
@@ -215,6 +233,39 @@ export function Globe({ lat, lon, results, onLocationClick }: GlobeProps) {
       },
     });
 
+    if (observerLat !== null && observerLon !== null) {
+      viewer.entities.add({
+        position: Cartesian3.fromDegrees(observerLon, observerLat),
+        point: {
+          pixelSize: 8,
+          color: Color.fromCssColorString('#89b4fa'),
+          outlineColor: Color.BLACK,
+          outlineWidth: 2,
+        },
+        label: {
+          text: 'Observer',
+          font: '12px sans-serif',
+          fillColor: Color.fromCssColorString('#89b4fa'),
+          outlineColor: Color.BLACK,
+          outlineWidth: 2,
+          verticalOrigin: VerticalOrigin.BOTTOM,
+          pixelOffset: new Cartesian3(0, -12, 0) as any,
+        },
+      });
+
+      viewer.entities.add({
+        polyline: {
+          positions: [
+            Cartesian3.fromDegrees(lon, lat),
+            Cartesian3.fromDegrees(observerLon, observerLat),
+          ],
+          width: 2,
+          material: Color.fromCssColorString('#89b4fa').withAlpha(0.5),
+          clampToGround: true,
+        },
+      });
+    }
+
     if (!results) return;
 
     const rings = buildRings(results);
@@ -239,7 +290,7 @@ export function Globe({ lat, lon, results, onLocationClick }: GlobeProps) {
         // skip rings too small or too large for Cesium
       }
     }
-  }, [lat, lon, results]);
+  }, [lat, lon, observerLat, observerLon, results]);
 
   return (
     <div
