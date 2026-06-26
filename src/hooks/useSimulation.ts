@@ -30,6 +30,38 @@ function haversineDistance(
   return 2 * EARTH_RADIUS * Math.asin(Math.sqrt(a));
 }
 
+const LAND_BOXES: [number, number, number, number][] = [
+  [-35, -75, 12, -34],    // South America
+  [7, -83, 49, -52],      // Central + North America east
+  [25, -130, 70, -83],    // North America west
+  [60, -170, 72, -130],   // Alaska
+  [35, -12, 71, 40],      // Europe
+  [-35, 8, 37, 52],       // Africa
+  [1, 95, 55, 145],       // East Asia
+  [8, 68, 55, 95],        // South/Central Asia
+  [40, 40, 55, 68],       // Middle East/Central Asia
+  [-47, 113, -10, 154],   // Australia
+  [-48, 165, -34, 179],   // New Zealand
+  [60, 30, 78, 180],      // Siberia
+  [-90, -180, -60, 180],  // Antarctica
+];
+
+function detectOcean(lat: number, lon: number): boolean {
+  for (const [latMin, lonMin, latMax, lonMax] of LAND_BOXES) {
+    if (lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function estimateOceanDepth(lat: number): number {
+  const absLat = Math.abs(lat);
+  if (absLat > 60) return 3000;
+  if (absLat < 15) return 4500;
+  return 4000;
+}
+
 function parseUrlParams(): { params: ImpactParams; lat: number; lon: number } | null {
   const hash = window.location.hash.slice(1);
   if (!hash) return null;
@@ -95,6 +127,21 @@ export function useSimulation() {
   const setImpactLocation = useCallback((lat: number, lon: number) => {
     setImpactLat(lat);
     setImpactLon(lon);
+
+    const isOcean = detectOcean(lat, lon);
+    if (isOcean) {
+      setParams(prev => ({
+        ...prev,
+        targetType: 'water',
+        waterDepth: estimateOceanDepth(lat),
+      }));
+    } else {
+      setParams(prev => ({
+        ...prev,
+        targetType: prev.targetType === 'water' ? 'sedimentary_rock' : prev.targetType,
+        waterDepth: 0,
+      }));
+    }
   }, []);
 
   const setObserverLocation = useCallback((lat: number, lon: number) => {
